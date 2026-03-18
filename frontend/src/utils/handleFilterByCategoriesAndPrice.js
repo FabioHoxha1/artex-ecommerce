@@ -20,6 +20,26 @@ export const priceRangeFn = (productsDataParams, priceRange) => {
   }
 };
 
+// Helper function to safely get category array from product
+const getCategoryArray = (productsData, categoryKey) => {
+  if (!productsData || !productsData.categories) {
+    return [];
+  }
+  
+  const categories = productsData.categories;
+  
+  // Handle both Map-like objects and plain objects
+  if (typeof categories.get === 'function') {
+    // It's a Map
+    return categories.get(categoryKey) || [];
+  } else if (typeof categories === 'object') {
+    // It's a plain object (most common after JSON serialization)
+    return categories[categoryKey] || [];
+  }
+  
+  return [];
+};
+
 export const handleFilterByCategoriesAndPrice = (
   dispatch,
   NoOfProductsPerPage,
@@ -29,10 +49,27 @@ export const handleFilterByCategoriesAndPrice = (
 ) => {
   const { priceRange, selectedSubCategoryForFilter, selectedCategory } = store.getState().filterByCategoryAndPrice;
 
+  console.log("[v0] Filter called with:", {
+    selectedCategory,
+    selectedSubCategoryForFilter,
+    priceRange,
+    productsCount: sortedAllProductsData?.length
+  });
+
+  // Debug: Log first product's categories structure
+  if (sortedAllProductsData && sortedAllProductsData.length > 0) {
+    console.log("[v0] First product categories structure:", sortedAllProductsData[0].categories);
+    console.log("[v0] First product title:", sortedAllProductsData[0].title);
+  }
+
   if (selectedSubCategoryForFilter && priceRange) {
-    let filteredProductsCategory = sortedAllProductsData.filter((productsData) =>
-      productsData.categories[selectedCategory].includes(selectedSubCategoryForFilter)
-    );
+    let filteredProductsCategory = sortedAllProductsData.filter((productsData) => {
+      const categoryArray = getCategoryArray(productsData, selectedCategory);
+      const matches = Array.isArray(categoryArray) && categoryArray.includes(selectedSubCategoryForFilter);
+      console.log("[v0] Product:", productsData.title, "Category array:", categoryArray, "Matches:", matches);
+      return matches;
+    });
+    console.log("[v0] Filtered products (category + price):", filteredProductsCategory.length);
     !doesTheFnCallNotNeedToast &&
       toast("Categories and price range filter has been applied", {
         type: "success",
@@ -46,9 +83,13 @@ export const handleFilterByCategoriesAndPrice = (
         autoClose: 3000,
       });
   } else if (selectedSubCategoryForFilter) {
-    let filteredProductsCategory = sortedAllProductsData.filter((productsData) =>
-      productsData.categories[selectedCategory].includes(selectedSubCategoryForFilter)
-    );
+    let filteredProductsCategory = sortedAllProductsData.filter((productsData) => {
+      const categoryArray = getCategoryArray(productsData, selectedCategory);
+      const matches = Array.isArray(categoryArray) && categoryArray.includes(selectedSubCategoryForFilter);
+      console.log("[v0] Product:", productsData.title, "Category array:", categoryArray, "Matches:", matches);
+      return matches;
+    });
+    console.log("[v0] Filtered products (category only):", filteredProductsCategory.length);
     !doesTheFnCallNotNeedToast &&
       toast("Categories filter has been applied", {
         type: "success",

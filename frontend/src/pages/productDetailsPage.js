@@ -255,13 +255,14 @@ export const ProductDetailsPage = () => {
               {typeof stock === "number" && !isNaN(stock) && stock >= 0 && " left in stock"}
             </span>
           </div>
-          <div>
-            <h2 className="font-bold text-[16px] xs:text-[20px] tracking-[0.5px]">Description</h2>
-            <p className="leading-[150%] tracking-[0.5px] text-sm xs:text-base">
-              {description ||
-                "Lorem ipsum dolor sit amet consectetur, adipisicing elit. Asperiores ut voluptatem vitae, temporibus fugit velit voluptate ea enim voluptas. Fugit?. Lorem ipsum dolor sit amet consectetur adipisicing elit. Doloribus amet excepturi unde voluptatum obcaecati dolorum vel numquam totam soluta inventore."}
-            </p>
-          </div>
+         {description && (
+  <div>
+    <h2 className="font-bold text-[16px] xs:text-[20px] tracking-[0.5px]">Description</h2>
+    <p className="leading-[150%] tracking-[0.5px] text-sm xs:text-base">
+      {description}
+    </p>
+  </div>
+)}
           <div className="flex items-center gap-3 xs:gap-4 flex-wrap">
             <h3 className="font-bold text-[16px] xs:text-[20px] tracking-[0.5px]">Quantity :</h3>
             <input

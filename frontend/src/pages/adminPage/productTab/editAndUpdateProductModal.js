@@ -92,16 +92,28 @@ export const EditAndupdateProductModal = ({
 
     setIsFetchingUpdatedDataLoading(true)
 
-    const formData = {
-      title,
-      description,
-      categories,
-      images, // Send images array
-      price: Number.parseFloat(price),
-      stock: Number.parseInt(stock),
-  // Round discount to two decimals to avoid floating point drift
-  discountPercentValue: Number(Number.parseFloat(discountPercentValue).toFixed(2)),
-    }
+const formData = {
+  title,
+  categories,
+  images,
+}
+
+// Only add optional fields if they have values
+if (description && description.trim() !== "") {
+  formData.description = description
+}
+
+if (price !== "" && price !== null && price !== undefined && !isNaN(Number(price))) {
+  formData.price = Number.parseFloat(price)
+}
+
+if (stock !== "" && stock !== null && stock !== undefined && !isNaN(Number(stock))) {
+  formData.stock = Number.parseInt(stock)
+}
+
+if (discountPercentValue !== "" && discountPercentValue !== null && discountPercentValue !== undefined && !isNaN(Number(discountPercentValue))) {
+  formData.discountPercentValue = Number(Number.parseFloat(discountPercentValue).toFixed(2))
+}
 
     const asyncCreateProductToastId = toast.loading("Product data upload in progress")
 
@@ -329,7 +341,6 @@ export const EditAndupdateProductModal = ({
                   })
                 }}
                 placeholder="Enter product description..."
-                required
               />
             </div>
             <div className="mb-6 flex gap-[2%] items-end justify-between">
@@ -348,7 +359,6 @@ export const EditAndupdateProductModal = ({
                     })
                   }}
                   className="w-full mt-2 p-2 border border-gray-300 rounded-lg"
-                  required
                 />
               </div>
               <div className="w-1/3">
@@ -365,7 +375,6 @@ export const EditAndupdateProductModal = ({
                     })
                   }}
                   className="w-full mt-2 p-2 border border-gray-300 rounded-lg"
-                  required
                 />
               </div>
               <div className="w-1/3">
