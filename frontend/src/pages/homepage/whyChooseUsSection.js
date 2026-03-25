@@ -20,7 +20,6 @@ export const WhyChooseUsSection = () => {
             </h4>
             <p className="leading-[140%] text-sm xs:text-base md:text-sm lg:text-base text-gray-600 max-w-[280px]">
               We offer shipping on all orders, so you can shop with confidence knowing that your items will be delivered directly to your doorstep.
-              costs.
             </p>
           </div>
 
