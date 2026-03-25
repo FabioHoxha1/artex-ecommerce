@@ -1,21 +1,21 @@
 import React from "react";
 import { BsArrowRight } from "react-icons/bs";
-import { useEffect, useState, useMemo } from "react";
+import { useEffect, useState } from "react";
 import { countDownOnTheLastDayOfTheMonth, countDownToTheEndOfTheMonth } from "../../../utils/countDownFns";
 import dealOfTheMonthImg from "../../../assets/livingRoomCategory.jpg";
 import { FaQuestion } from "react-icons/fa";
+import { useNavigate } from "react-router-dom";
 
 export const DealOfTheMonth = () => {
   const [isOfferOn, setIsOfferOn] = useState(false);
   const [offerProduct, setOfferProduct] = useState({
     title: "borsalino chair",
-    price: 500,
     discountPercentValue: 97,
-    stock: 1,
     imgUrl: dealOfTheMonthImg,
   });
 
-  const { title, price, discountPercentValue, stock, imgUrl } = offerProduct;
+  const { title, discountPercentValue, imgUrl } = offerProduct;
+  const navigate = useNavigate();
 
   const [periodToLastDayOfTheMonth, setPeriodsToLastDayOfTheMonth] = useState({ days: 0, mins: 0, secs: 0, hours: 0 });
 
@@ -43,8 +43,6 @@ export const DealOfTheMonth = () => {
     } else if (isCurrentDateLastDayOfTheMonth) {
       setIsOfferOn(true);
 
-      // endingOfTheLastDayOfTheMonth is the last milliseconds of the lastDayOfTheMonth
-
       let clearLastDayOfMonthCount = setInterval(() => {
         countDownOnTheLastDayOfTheMonth(
           clearLastDayOfMonthCount,
@@ -56,11 +54,9 @@ export const DealOfTheMonth = () => {
     }
   }, [isCurrentDateLastDayOfTheMonth]);
 
-  let discountedPrice = price - (price * discountPercentValue) / 100;
-
   return (
     <section className="mb-20">
-      <h1 className="font-bold text-[36px] mb-8 text-center ">Deal of the Month</h1>
+      <h1 className="font-bold text-[36px] mb-8 text-center ">Featured Product of the Month</h1>
       <div className="w-[100%] md:w-[100%] lg:gap-0  lg:justify-between bg-neutralColor  pb-14 gap-9 lg:order-1 flex flex-col lg:pl-0  lg:flex-row md:py-0 lg:min-h-[480px]  lg:pr-[1%]">
         <div className="w-[100%] lg:max-h-[600px] max-h-[620px] md:h-[600px] h-auto md:min-h-[600px] relative lg:mx-0 mx-auto lg:basis-[55%]">
           {imgUrl.length < 0 ? (
@@ -73,9 +69,9 @@ export const DealOfTheMonth = () => {
             <>
               <img className="w-[100%]  h-[100%]" alt="monthly-deal" src={dealOfTheMonthImg} />
 
-              {isOfferOn && stock <= 0 && (
+              {isOfferOn && (
                 <div className="flex justify-center items-center absolute w-16 tablet:w-24 tablet:h-24 md:w-28 md:h-28  h-16 z-[100] top-4 left-4 rounded-[50%] hover:opacity-100 bg-lightPrimaryColor text-white  shadow-[0px_3px_8px_0px_rgba(0,0,0,0.2)]  ">
-                  <span className="text-sm tablet:text-base font-bold md:text-base">sold out</span>
+                  <span className="text-sm tablet:text-base font-bold md:text-base">{discountPercentValue}% OFF</span>
                 </div>
               )}
             </>
@@ -126,48 +122,17 @@ export const DealOfTheMonth = () => {
             </div>
             <div className="flex gap-2 items-center">
               <h3 className="font-bold text-[20px] md:text-[24px] lg:text-[20px] xl:text-2xl tracking-[0.5px] font-RobotoSlab ">
-                Price :
+                Pricing :
               </h3>
-              {isOfferOn ? (
-                <>
-                  {" "}
-                  {discountPercentValue > 0 ? (
-                    <div className="flex gap-3">
-                      <h3 className="font-bold text-[20px] md:text-[28px] font-RobotoSlab tracking-[1px]">
-                        ${discountedPrice.toFixed(2)}
-                      </h3>
-                      <h3 className="line-through tracking-[1px] text-[18px] md:text-[20px] font-RobotoSlab">
-                        ${price.toFixed(2)}
-                      </h3>
-                    </div>
-                  ) : (
-                    <h3 className="font-bold text-[20px] md:text-[28px] tracking-[1px] font-RobotoSlab">
-                      ${price.toFixed(2)}
-                    </h3>
-                  )}
-                </>
-              ) : (
-                <span className="font-bold">???</span>
-              )}
-            </div>
-            <div className="flex gap-2 items-center">
-              <h3 className="font-bold text-[20px] md:text-[24px] lg:text-[20px] xl:text-2xl tracking-[0.5px] font-RobotoSlab ">
-                Availability :
-              </h3>
-              {isOfferOn ? (
-                <span className="text-primaryColor text-lg md:text-xl xl:text-2xl tracking-[0.7px] font-RobotoSlab md:xl ">
-                  {offerProduct.stock < 0 ? "Out of stock" : <strong>{offerProduct.stock}</strong>}
-                  {offerProduct.stock >= 0 && " left in stock"}
-                </span>
-              ) : (
-                <span className="font-bold">???</span>
-              )}
             </div>
           </div>
 
           {isOfferOn && (
-            <button className=" text-primaryColor min-w-[150px] max-w-[160px] bg-transparent border-[1px] border-primaryColor cursor-pointer rounded-sm h-[52px] tablet:[52px] tablet:w-[154px] w-[20%] gap-2 justify-center  flex items-center font-bold font-RobotoCondensed hover:text-white hover:border-transparent hover:bg-primaryColor hover:duration-500 hover:transition">
-              <span> Buy Now</span>
+            <button 
+              className=" text-primaryColor min-w-[150px] max-w-[180px] bg-transparent border-[1px] border-primaryColor cursor-pointer rounded-sm h-[52px] tablet:[52px] tablet:w-[180px] w-[25%] gap-2 justify-center  flex items-center font-bold font-RobotoCondensed hover:text-white hover:border-transparent hover:bg-primaryColor hover:duration-500 hover:transition"
+              onClick={() => navigate("/shop")}
+            >
+              <span>Request Quote</span>
               <BsArrowRight />
             </button>
           )}

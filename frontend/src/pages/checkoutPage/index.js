@@ -20,8 +20,6 @@ export const CheckoutPage = ({ setIsCartSectionActive }) => {
     userData: { email, username, country, city, address, postalCode, phoneNumber },
   } = useSelector((state) => state.userAuth)
 
-  const [totalAmountToBePaid, setTotalAmountToBePaid] = useState(0)
-
   const [checkoutFormData, setCheckoutFormData] = useState({
     username: username || "",
     email: email,
@@ -59,7 +57,7 @@ export const CheckoutPage = ({ setIsCartSectionActive }) => {
     isTokenValidBeforeHeadingToRoute(dispatch, navigate)
   }, [dispatch, navigate])
 
-  const orderDetails = {
+  const quoteDetails = {
     products: cart.map((products) => {
       return { productId: products._id, quantity: products.quantity }
     }),
@@ -70,12 +68,10 @@ export const CheckoutPage = ({ setIsCartSectionActive }) => {
     city: checkoutFormData.city,
     postalCode: checkoutFormData.postalCode,
     phoneNumber: checkoutFormData.phoneNumber,
-    deliveryStatus: "pending",
-    paymentStatus: "pending",
-    totalAmount: totalAmountToBePaid,
+    status: "pending",
   }
 
-  const placeOrderFn = async (e) => {
+  const submitQuoteFn = async (e) => {
     const serverUrl = process.env.REACT_APP_SERVER_URL || "http://localhost:5000"
     e.preventDefault()
 
@@ -84,7 +80,7 @@ export const CheckoutPage = ({ setIsCartSectionActive }) => {
     try {
       await axios.post(
         `${serverUrl}/api/v1/orders/placeOrders`,
-        { orderDetails },
+        { orderDetails: { ...quoteDetails, deliveryStatus: "quote_requested", paymentStatus: "quote", totalAmount: 0 } },
         {
           withCredentials: true,
           headers: {
@@ -94,9 +90,9 @@ export const CheckoutPage = ({ setIsCartSectionActive }) => {
         },
       )
 
-      toast("Order has successfully been placed, redirecting to your orders...", {
+      toast("Quote request has been submitted successfully! We will contact you soon.", {
         type: "success",
-        autoClose: 2000,
+        autoClose: 3000,
         position: "top-center",
       })
 
@@ -121,8 +117,8 @@ export const CheckoutPage = ({ setIsCartSectionActive }) => {
         navigate("/profilePage/myOrders")
       }, 2000)
     } catch (error) {
-      console.log("[v0] Order placement error:", error)
-      toast(error.response?.data?.message || error.message || "Failed to place order", {
+      console.log("[v0] Quote submission error:", error)
+      toast(error.response?.data?.message || error.message || "Failed to submit quote request", {
         type: "error",
         autoClose: 4000,
         position: "top-center",
@@ -146,12 +142,12 @@ export const CheckoutPage = ({ setIsCartSectionActive }) => {
               Shop
             </li>
             <IoIosArrowBack />
-            <span className=" capitalize">Checkout</span>
+            <span className=" capitalize">Request Quote</span>
           </div>
         </div>
         <div className="flex flex-col-reverse lg:flex-row lg:flex lg:w-[96%] xl:w-[92%] lg:mx-auto lg:justify-between mb-20 lg:items-start">
-          <CheckoutForm {...{ placeOrderFn, checkoutFormData, setCheckoutFormData }} />
-          <OrderSummary {...{ setTotalAmountToBePaid }} />
+          <CheckoutForm {...{ submitQuoteFn, checkoutFormData, setCheckoutFormData }} />
+          <OrderSummary />
         </div>
       </>
     )

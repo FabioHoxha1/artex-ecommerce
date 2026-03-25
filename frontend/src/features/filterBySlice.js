@@ -1,8 +1,9 @@
 import { createSlice } from "@reduxjs/toolkit";
 
 const initialState = {
-  selectedSubCategoryForFilter: null,
-  selectedCategory: null,
+  // Changed to arrays to support multiple selections
+  selectedSubCategories: [],
+  selectedCategories: [],
   priceRange: null,
 };
 
@@ -10,23 +11,60 @@ export const filterBySlice = createSlice({
   name: "filterBySlice",
   initialState,
   reducers: {
-    setSelectedSubCategoryForFilter: (state, { payload }) => {
-      state.selectedSubCategoryForFilter = payload;
+    // Toggle a subcategory in the selection
+    toggleSubCategory: (state, { payload }) => {
+      const { category, subCategory } = payload;
+      const existingIndex = state.selectedSubCategories.findIndex(
+        (item) => item.category === category && item.subCategory === subCategory
+      );
+      
+      if (existingIndex >= 0) {
+        // Remove if already selected
+        state.selectedSubCategories.splice(existingIndex, 1);
+        // Also remove category if no more subcategories from it
+        const hasOtherSubcategories = state.selectedSubCategories.some(
+          (item) => item.category === category
+        );
+        if (!hasOtherSubcategories) {
+          state.selectedCategories = state.selectedCategories.filter((c) => c !== category);
+        }
+      } else {
+        // Add if not selected
+        state.selectedSubCategories.push({ category, subCategory });
+        if (!state.selectedCategories.includes(category)) {
+          state.selectedCategories.push(category);
+        }
+      }
     },
-    setSelectedCategory: (state, { payload }) => {
-      state.selectedCategory = payload;
+    // Clear all filter selections
+    clearAllFilters: (state) => {
+      state.selectedSubCategories = [];
+      state.selectedCategories = [];
+      state.priceRange = null;
     },
     setPriceRange: (state, { payload }) => {
       state.priceRange = payload;
     },
+    // Legacy setters for backwards compatibility
+    setSelectedSubCategoryForFilter: (state, { payload }) => {
+      if (payload === null) {
+        state.selectedSubCategories = [];
+      }
+    },
+    setSelectedCategory: (state, { payload }) => {
+      if (payload === null) {
+        state.selectedCategories = [];
+      }
+    },
   },
 });
 
-export const { setPriceRange, setSelectedCategory, setSelectedSubCategoryForFilter } = filterBySlice.actions;
+export const { 
+  toggleSubCategory, 
+  clearAllFilters, 
+  setPriceRange, 
+  setSelectedCategory, 
+  setSelectedSubCategoryForFilter 
+} = filterBySlice.actions;
 
 export default filterBySlice.reducer;
-
-//FILTER CRITERIA =
-//  selectedCategory-VALUE OF THE CHECKED MAIN PRODUCT CATEGORY
-// priceRange- VALUE OF SELECTED PRICE RANGE
-// selectedSubCategoryForFilter- VALUE OF CHECKED SUB CATEGORY

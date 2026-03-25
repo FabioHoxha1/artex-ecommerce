@@ -2,20 +2,18 @@
 
 import { CategoryLists } from "./categoryLists"
 import { useState, useEffect } from "react"
-import { RiArrowDropDownLine } from "react-icons/ri"
-import { RiArrowDropUpLine } from "react-icons/ri"
-import { setSelectedCategory, setSelectedSubCategoryForFilter } from "../../../features/filterBySlice"
-import { useDispatch } from "react-redux"
+import { RiArrowDropDownLine, RiArrowDropUpLine } from "react-icons/ri"
+import { useSelector } from "react-redux"
 import { AnimatePresence, motion } from "framer-motion"
 import { useCategories } from "../../../hooks/useCategories"
 
-const Index = ({ setCheckedCategoryDOM }) => {
+const Index = () => {
   const [isCategorySectionOpen, setIsCategorySectionOpen] = useState(true)
   const [productCategories, setProductCategories] = useState({})
   const [isLoading, setIsLoading] = useState(true)
 
-  const dispatch = useDispatch()
   const { categories: fetchedCategories } = useCategories()
+  const { selectedSubCategories } = useSelector((state) => state.filterByCategoryAndPrice)
 
   useEffect(() => {
     setIsLoading(true)
@@ -25,79 +23,60 @@ const Index = ({ setCheckedCategoryDOM }) => {
       setProductCategories({})
     }
     setIsLoading(false)
-    // Note: useCategories exposes a refresh() if the admin changes categories and wants a forced refetch.
   }, [fetchedCategories])
-
-  // LOOP THROUGH THE DESCENDANTS WHILE SKIPPING THE EVENT TARGET AND GET THE CHECKBOXES DOM
-  const handleCheckedCategory = (e) => {
-    const descendants = e.currentTarget.getElementsByTagName("*")
-    for (let i = 0; i < descendants.length; i++) {
-      if (descendants[i] === e.target) {
-        continue
-      }
-      descendants[i].checked = false
-    }
-
-    if (e.target.checked) {
-      dispatch(
-        setSelectedCategory(e.target.parentElement.parentElement.previousElementSibling.firstElementChild.textContent),
-      )
-      dispatch(setSelectedSubCategoryForFilter(e.target.value))
-      setCheckedCategoryDOM(e.target)
-    } else {
-      dispatch(setSelectedCategory(null))
-      dispatch(setSelectedSubCategoryForFilter(null))
-    }
-  }
 
   if (isLoading) {
     return (
-      <article className="flex flex-col gap-4 md:gap-5 tablet:gap-5">
+      <article className="flex flex-col gap-2">
         <div className="flex items-center justify-between">
-          <h3 className="text-xl font-bold">Categories</h3>
+          <h3 className="text-base font-bold">Categories</h3>
         </div>
-        <div className="text-center py-4">Loading categories...</div>
+        <div className="text-center py-2 text-sm">Loading...</div>
       </article>
     )
   }
 
   if (Object.keys(productCategories).length === 0) {
     return (
-      <article className="flex flex-col gap-4 md:gap-5 tablet:gap-5">
+      <article className="flex flex-col gap-2">
         <div className="flex items-center justify-between">
-          <h3 className="text-xl font-bold">Categories</h3>
+          <h3 className="text-base font-bold">Categories</h3>
         </div>
-        <div className="text-center py-4 text-gray-500">
-          No categories available. Add categories from the admin panel.
+        <div className="text-center py-2 text-gray-500 text-sm">
+          No categories available
         </div>
       </article>
     )
   }
 
   return (
-    <article className="flex flex-col gap-4 md:gap-5 tablet:gap-5">
+    <article className="flex flex-col gap-2">
       <div className="flex items-center justify-between">
-        <h3 className="text-xl font-bold">Categories</h3>
+        <h3 className="text-base font-bold">Categories</h3>
         {isCategorySectionOpen ? (
           <RiArrowDropUpLine
-            className=" w-8 h-6 cursor-pointer"
+            className="w-6 h-5 cursor-pointer"
             onClick={() => setIsCategorySectionOpen(!isCategorySectionOpen)}
           />
         ) : (
           <RiArrowDropDownLine
-            className="w-8 h-6 cursor-pointer"
+            className="w-6 h-5 cursor-pointer"
             onClick={() => setIsCategorySectionOpen(!isCategorySectionOpen)}
           />
         )}
       </div>
+      {selectedSubCategories.length > 0 && (
+        <div className="text-xs text-primaryColor font-medium">
+          {selectedSubCategories.length} filter{selectedSubCategories.length > 1 ? "s" : ""} selected
+        </div>
+      )}
       <AnimatePresence>
         {isCategorySectionOpen && (
           <motion.div
             initial={{ height: 0 }}
             animate={{ height: "auto" }}
-            exit={{ overflowY: "hidden", height: 0, transition: { duration: 0.3, ease: "easeOut" } }}
-            className="flex flex-col gap-4 tablet:gap-5 md:gap-5 w-[100%]"
-            onChange={(e) => handleCheckedCategory(e)}
+            exit={{ overflowY: "hidden", height: 0, transition: { duration: 0.2, ease: "easeOut" } }}
+            className="flex flex-col gap-2 w-[100%]"
           >
             {Object.keys(productCategories).map((categoryTitle, index) => {
               return <CategoryLists key={index} {...{ categoryTitle, productCategories }} />
@@ -110,4 +89,3 @@ const Index = ({ setCheckedCategoryDOM }) => {
 }
 
 export default Index
-  

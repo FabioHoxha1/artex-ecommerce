@@ -189,7 +189,7 @@ export const Header = ({ setIsWishlistActive, setIsCartSectionActive, isLargeScr
                 {totalProductQuantityCart}
               </span>
             </div>
-            <span className="text-[18px] hidden cursor-pointer xl:block">&nbsp;Cart</span>
+            <span className="text-[18px] hidden cursor-pointer xl:block">&nbsp;Quote</span>
           </div>
           <button
             className="p-2 xs:p-3 bg-neutralColor md:hidden"

@@ -1,29 +1,25 @@
 import { store } from "../store";
 import { setPlaceholderOfproductsDataCurrentlyRequested } from "../features/productSlice";
-import { setSelectedCategory, setSelectedSubCategoryForFilter, setPriceRange } from "../features/filterBySlice";
+import { clearAllFilters } from "../features/filterBySlice";
 import { toast } from "react-toastify";
 
 export const resetFilter = (checkedCategory, checkedPriceRange, location, dispatch, theFnCallDoesNotNeedsToast) => {
   const { sortedAllProductsData, sortedSearchedProductData } = store.getState().productsData;
 
-  dispatch(setSelectedCategory(null));
-  dispatch(setSelectedSubCategoryForFilter(null));
-  dispatch(setPriceRange(null));
-  location.pathname === "/shop" && dispatch(setPlaceholderOfproductsDataCurrentlyRequested(sortedAllProductsData));
-  location.pathname === "/search" &&
-    dispatch(setPlaceholderOfproductsDataCurrentlyRequested(sortedSearchedProductData));
-  if (checkedCategory) {
-    checkedCategory.checked = false;
+  // Clear all filter selections in Redux
+  dispatch(clearAllFilters());
+  
+  // Reset products to show all
+  if (location.pathname === "/shop") {
+    dispatch(setPlaceholderOfproductsDataCurrentlyRequested(sortedAllProductsData));
   }
-  if (checkedPriceRange) {
-    checkedPriceRange.checked = false;
+  if (location.pathname === "/search") {
+    dispatch(setPlaceholderOfproductsDataCurrentlyRequested(sortedSearchedProductData));
   }
 
   !theFnCallDoesNotNeedsToast &&
-    toast("filter criterias has been reset", {
+    toast("Filters have been reset", {
       type: "success",
       autoClose: 3000,
     });
 };
-
-// if the function is called from useEffect ,toasts message dont show up

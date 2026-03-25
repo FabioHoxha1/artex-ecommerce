@@ -1,11 +1,10 @@
 "use client"
 
 import { IoCloseOutline } from "react-icons/io5"
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { useSelector, useDispatch } from "react-redux"
 import CategoriesSection from "./CategorySection"
 import { handleFilterByCategoriesAndPrice } from "../../utils/handleFilterByCategoriesAndPrice"
-import { useEffect } from "react"
 import { useLocation } from "react-router-dom"
 import { resetFilter } from "../../utils/resetFilter"
 import { motion } from "framer-motion"
@@ -18,26 +17,22 @@ export const FilterBySection = ({
   NoOfProductsPerPage,
   setIsFilterFnApplied,
 }) => {
-  // DOMS OF THE CHECKED ELEM FOR UNCHECKING DURING RESET
-  const [checkedCategoryDOM, setCheckedCategoryDOM] = useState(null)
   const [isScreenAbove1024, setIsScreenAbove1024] = useState(false)
 
   const dispatch = useDispatch()
   const location = useLocation()
 
   const { sortedAllProductsData, sortedSearchedProductData } = useSelector((state) => state.productsData)
+  const { selectedSubCategories } = useSelector((state) => state.filterByCategoryAndPrice)
 
-  //this is to distinguish between when the filter function is to display toast message and when its not to
   const theFnCallDoesNotNeedToast = true
 
   // RESET FILTERS WHEN LOCATION URL CHANGES
   useEffect(() => {
-    // reset filters when location changes; include referenced variables in deps
-    resetFilter(checkedCategoryDOM, null, location, dispatch, theFnCallDoesNotNeedToast)
-  }, [location, checkedCategoryDOM, dispatch, theFnCallDoesNotNeedToast]) // Updated to use the entire location object
+    resetFilter(null, null, location, dispatch, theFnCallDoesNotNeedToast)
+  }, [location.pathname, dispatch])
 
-  // Filter in the shop page is from the sortedAllProductsData while the one in the searchpage is from sortedSearchedProductsData
-
+  // Auto-apply filter when selections change (for desktop)
   useEffect(() => {
     if (location.pathname === "/shop") {
       handleFilterByCategoriesAndPrice(
@@ -48,7 +43,7 @@ export const FilterBySection = ({
         theFnCallDoesNotNeedToast,
       )
     }
-  }, [location.pathname, sortedAllProductsData, dispatch, NoOfProductsPerPage, currentPageNo, theFnCallDoesNotNeedToast])
+  }, [location.pathname, sortedAllProductsData, selectedSubCategories, dispatch, NoOfProductsPerPage, currentPageNo])
 
   useEffect(() => {
     if (location.pathname === "/search") {
@@ -60,28 +55,17 @@ export const FilterBySection = ({
         theFnCallDoesNotNeedToast,
       )
     }
-  }, [location.pathname, sortedSearchedProductData, dispatch, NoOfProductsPerPage, currentPageNo, theFnCallDoesNotNeedToast])
+  }, [location.pathname, sortedSearchedProductData, selectedSubCategories, dispatch, NoOfProductsPerPage, currentPageNo])
 
-  // check if screen is larger than 1024px
-  // the reasons for the two methods is because the first if/else checks on first render while the resize listener checks on every resize
-  // REMAINDER: i need to change this to custom useState later
-
+  // Check screen size
   useEffect(() => {
     const handleResize = () => {
-      if (window.innerWidth >= 1024) {
-        setIsScreenAbove1024(true)
-      } else if (window.innerWidth < 1024) {
-        setIsScreenAbove1024(false)
-      }
+      setIsScreenAbove1024(window.innerWidth >= 1024)
     }
 
-    handleResize() // Initial check on first render
-
+    handleResize()
     window.addEventListener("resize", handleResize)
-
-    return () => {
-      window.removeEventListener("resize", handleResize)
-    }
+    return () => window.removeEventListener("resize", handleResize)
   }, [])
 
   useEffect(() => {
@@ -93,56 +77,59 @@ export const FilterBySection = ({
       initial={{ x: "100%" }}
       animate={{ x: isFilterBySectionOpen ? "0%" : "100%" }}
       transition={{ duration: 0.4, ease: "easeInOut" }}
-      className={`fixed  lg:mt-16 h-[100vh] lg:max-w-[200px]  lg:static lg:ml-[8%] xl:ml-[20%] lg:col-span-1 lg:row-span-2 lg:w-[100%] lg:translate-x-0 lg:h-auto lg:bg-opacity-100 top-0 left-0 w-[100%] lg:bg-transparent z-[1500] bg-opacity-60 bg-[#000000] translate-x-[100%] lg:z-0  ${
+      className={`fixed lg:sticky lg:top-4 h-[100vh] lg:h-auto lg:max-h-[calc(100vh-2rem)] lg:self-start lg:max-w-[180px] lg:static lg:ml-[4%] xl:ml-[8%] lg:col-span-1 lg:row-span-2 lg:w-[100%] lg:translate-x-0 lg:bg-opacity-100 top-0 left-0 w-[100%] lg:bg-transparent z-[1500] bg-opacity-60 bg-[#000000] translate-x-[100%] lg:z-0 ${
         isFilterBySectionOpen && "translate-x-[0%]"
       }`}
     >
-      <section className="flex lg:w-[100%] flex-col md:w-[45%] md:max-w-[360px] tablet:w-[60%] tablet:max-w-[320px] max-w-[320px] lg:z-0 z-[2000] overflow-y-auto absolute top-0 bg-white items-start px-[4%] lg:px-0 w-[80%] right-0 pt-4 pb-10 gap-6 tracking-[0.25px] text-lg h-[100%] lg:static ">
-        <h2 className="text-center w-[100%] text-[1.75rem] mt-2 font-bold border-b-[2px] border-LightSecondaryColor pb-2">
+      <section className="flex lg:w-[100%] flex-col md:w-[40%] md:max-w-[280px] tablet:w-[55%] tablet:max-w-[260px] max-w-[280px] lg:z-0 z-[2000] overflow-y-auto absolute top-0 bg-white items-start px-[3%] lg:px-0 w-[75%] right-0 pt-3 pb-8 gap-4 tracking-[0.25px] text-base h-[100%] lg:static lg:h-auto lg:overflow-visible lg:bg-transparent lg:shadow-none shadow-lg">
+        <h2 className="text-center w-[100%] text-lg font-bold border-b-[1px] border-LightSecondaryColor pb-2">
           Filter by
         </h2>
         <IoCloseOutline
-          className="absolute top-5 right-4 w-9 h-9 cursor-pointer lg:hidden"
+          className="absolute top-3 right-3 w-7 h-7 cursor-pointer lg:hidden"
           onClick={() => setIsFilterBySectionOpen(false)}
         />
-        <div className="w-[100%]">
-          <CategoriesSection {...{ setCheckedCategoryDOM }} />
+        <div className="w-[100%] max-h-[60vh] lg:max-h-[50vh] overflow-y-auto pr-1">
+          <CategoriesSection />
         </div>
-        <div className="flex items-center justify-between w-[100%] gap-[10%] ">
+        
+        {/* Selected filters count */}
+        {selectedSubCategories.length > 0 && (
+          <div className="w-full text-xs text-gray-600 border-t border-LightSecondaryColor pt-2">
+            {selectedSubCategories.length} filter{selectedSubCategories.length > 1 ? "s" : ""} active
+          </div>
+        )}
+        
+        <div className="flex items-center justify-between w-[100%] gap-2 mt-auto">
           <motion.button
             initial="initial"
             whileTap="click"
             variants={primaryBtnVariant}
-            className="h-[40px] basis-[35%] bg-primaryColor hover:bg-darkPrimaryColor text-white rounded-md transition-colors duration-300"
+            className="h-[36px] flex-1 bg-primaryColor hover:bg-darkPrimaryColor text-white text-sm rounded transition-colors duration-300"
             onClick={() => {
-              location.pathname === "/shop" &&
+              if (location.pathname === "/shop") {
                 handleFilterByCategoriesAndPrice(dispatch, NoOfProductsPerPage, currentPageNo, sortedAllProductsData)
-              location.pathname === "/search" &&
-                handleFilterByCategoriesAndPrice(
-                  dispatch,
-                  NoOfProductsPerPage,
-                  currentPageNo,
-                  sortedSearchedProductData,
-                )
-
-              setIsFilterFnApplied(true)
-              isScreenAbove1024 ? setIsFilterBySectionOpen(true) : setIsFilterBySectionOpen(false)
+              }
+              if (location.pathname === "/search") {
+                handleFilterByCategoriesAndPrice(dispatch, NoOfProductsPerPage, currentPageNo, sortedSearchedProductData)
+              }
+              setIsFilterFnApplied(selectedSubCategories.length > 0)
+              if (!isScreenAbove1024) setIsFilterBySectionOpen(false)
             }}
           >
-            Filter
+            Apply
           </motion.button>
           <motion.button
             whileHover={{ backgroundColor: "#8b7355", borderWidth: "0px", color: "#ffffff" }}
             transition={{ duration: 0.4 }}
-            className="h-[40px] basis-[65%] bg-transparent border-[1px] border-secondaryColor text-black rounded-md"
-            onClick={(e) => {
-              resetFilter(checkedCategoryDOM, null, location, dispatch)
-
+            className="h-[36px] flex-1 bg-transparent border-[1px] border-secondaryColor text-black text-sm rounded"
+            onClick={() => {
+              resetFilter(null, null, location, dispatch)
               setIsFilterFnApplied(false)
-              isScreenAbove1024 ? setIsFilterBySectionOpen(true) : setIsFilterBySectionOpen(false)
+              if (!isScreenAbove1024) setIsFilterBySectionOpen(false)
             }}
           >
-            Reset Filter
+            Reset
           </motion.button>
         </div>
       </section>

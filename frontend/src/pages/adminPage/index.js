@@ -122,6 +122,12 @@ export const Index = () => {
                 {" "}
                 <li data-tabpath="Admins">Admins</li>
               </Link>
+              <Link to="projects-Management">
+                <li data-tabpath="Projects management">Projects management</li>
+              </Link>
+              <Link to="messages">
+                <li data-tabpath="Messages">Messages</li>
+              </Link>
             </div>
           </article>
           <div
@@ -132,7 +138,7 @@ export const Index = () => {
           </div>
         </div>
         <h2 className="font-RobotoSlab text-3xl font-bold my-4 w-[100%] xl:pl-[4%] tablet:pl-[6%] pl-[4%] lg:pl-[2%] ">
-          Welcome auf3
+          Welcome To The Admin Page
         </h2>
         {/* nested routes jsx */}
         {/* redirection was done directly to prvenet manul acess of all nested */}

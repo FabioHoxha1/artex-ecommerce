@@ -20,23 +20,20 @@ export const ProductDetailsPage = () => {
   const { allProductsData, isLoading } = useSelector((state) => state.productsData)
   const { wishlist, cart } = useSelector((state) => state.wishlistAndCartSection)
 
-  const [productQuantityInCart, setProductQuantityInCart] = useState(1)
+  const [productQuantity, setProductQuantity] = useState(1)
   const [isWishlisted, setIsWishlisted] = useState(false)
-  const [isProductInCart, setIsProductInCart] = useState(false)
+  const [isProductInQuote, setIsProductInQuote] = useState(false)
   const [selectedImageIndex, setSelectedImageIndex] = useState(0)
 
   const { productId } = useParams()
   const currentProduct = allProductsData.find((product) => product._id === productId)
-  const { _id, title, description, price, images, image, discountPercentValue, categories, stock } = currentProduct || {
+  const { _id, title, description, images, image, categories } = currentProduct || {
     _id: "",
     title: "",
     description: "",
-    price: "",
     images: [],
     image: "",
-    discountPercentValue: "",
     categories: "",
-    stock: "",
   }
 
   const serverUrl = process.env.REACT_APP_SERVER_URL || "http://localhost:5000"
@@ -64,19 +61,15 @@ export const ProductDetailsPage = () => {
     if (categories[key].length > 0) subCategoriesArr.push(...categories[key])
   }
 
-  const handleAddAndRemoveItemInCartFn = () => {
-    const quantity = Number.parseInt(productQuantityInCart)
-    if (!hasPrice || !hasDiscount || !hasStock) {
-      alert("This product cannot be added to cart because it has no price, discount, or stock value.")
-      return
-    }
+  const handleAddAndRemoveItemInQuoteFn = () => {
+    const quantity = Number.parseInt(productQuantity)
     if (quantity < 1 || isNaN(quantity)) {
-      alert("product cant be less than 1")
-    } else if (!isProductInCart) {
+      alert("Quantity can't be less than 1")
+    } else if (!isProductInQuote) {
       handleCartModification(_id, dispatch, quantity, false)
-      setProductQuantityInCart(1)
+      setProductQuantity(1)
     } else {
-      handleCartModification(_id, dispatch, null, isProductInCart)
+      handleCartModification(_id, dispatch, null, isProductInQuote)
     }
   }
 
@@ -85,16 +78,14 @@ export const ProductDetailsPage = () => {
   }, [wishlist, _id])
 
   useEffect(() => {
-    isProductInCartFn(_id, setIsProductInCart, cart)
+    isProductInCartFn(_id, setIsProductInQuote, cart)
   }, [cart, _id])
 
-  
-
-  const buyNowFn = () => {
-    const quantity = Number.parseInt(productQuantityInCart)
+  const requestQuoteNowFn = () => {
+    const quantity = Number.parseInt(productQuantity)
     if (quantity < 1 || isNaN(quantity)) {
-      alert("product cant be less than 1")
-    } else if (isProductInCart) {
+      alert("Quantity can't be less than 1")
+    } else if (isProductInQuote) {
       handleCartModification(_id, dispatch, quantity, false)
       navigate("/checkout")
     } else {
@@ -102,13 +93,6 @@ export const ProductDetailsPage = () => {
       navigate("/checkout")
     }
   }
-
-  const hasPrice = typeof price === "number" && !isNaN(price)
-  const hasDiscount = typeof discountPercentValue === "number" && !isNaN(discountPercentValue)
-  const hasStock = typeof stock === "number" && !isNaN(stock)
-  const displayPrice = hasPrice ? price : null
-  const displayDiscount = hasDiscount ? discountPercentValue : null
-  const discountedPrice = hasPrice && hasDiscount ? price - (price * discountPercentValue) / 100 : null
 
   if (isLoading) {
     return <ProductLoader />
@@ -226,50 +210,23 @@ export const ProductDetailsPage = () => {
         <div className="lg:basis-[40%] mt-8 xs:mt-16 lg:mt-0 flex flex-col gap-4 xs:gap-6">
           <h2 className="text-[22px] xs:text-[28px] font-bold tracking-[0.5px] capitalize">{title}</h2>
 
-          {displayDiscount && displayPrice ? (
-            <div className="flex gap-2 flex-wrap items-baseline">
-              <h3 className="font-bold text-[20px] xs:text-[24px] md:text-[28px] tracking-[1px]">
-                ${discountedPrice.toFixed(2)} USD
-              </h3>
-              <h3 className="line-through tracking-[1px] text-[16px] xs:text-[20px] md:text-[24px]">
-                ${price.toFixed(2)} USD
-              </h3>
+
+          {description && (
+            <div>
+              <h2 className="font-bold text-[16px] xs:text-[20px] tracking-[0.5px]">Description</h2>
+              <p className="leading-[150%] tracking-[0.5px] text-sm xs:text-base">
+                {description}
+              </p>
             </div>
-          ) : displayPrice !== null ? (
-            <h3 className="font-bold text-[20px] xs:text-[24px] md:text-[28px] tracking-[1px]">
-              ${price.toFixed(2)} USD
-            </h3>
-          ) : (
-            <h3 className="font-bold text-[20px] xs:text-[24px] md:text-[28px] tracking-[1px] text-gray-400">
-              
-            </h3>
           )}
-          <div className="flex gap-1 items-end flex-wrap">
-            <h3 className="font-bold tracking-[0.5px] text-[16px] xs:text-[20px]">Availability :</h3>
-            <span className="text-[#a68b6a] tracking-[0.7px] text-[14px] xs:text-[18px]">
-              {typeof stock === "number" && !isNaN(stock)
-                ? stock < 0
-                  ? "Out of stock"
-                  : <strong>{stock}</strong>
-                : "No stock info"}
-              {typeof stock === "number" && !isNaN(stock) && stock >= 0 && " left in stock"}
-            </span>
-          </div>
-         {description && (
-  <div>
-    <h2 className="font-bold text-[16px] xs:text-[20px] tracking-[0.5px]">Description</h2>
-    <p className="leading-[150%] tracking-[0.5px] text-sm xs:text-base">
-      {description}
-    </p>
-  </div>
-)}
           <div className="flex items-center gap-3 xs:gap-4 flex-wrap">
             <h3 className="font-bold text-[16px] xs:text-[20px] tracking-[0.5px]">Quantity :</h3>
             <input
               className="w-[80px] xs:w-[20%] h-[40px] focus:outline-secondaryColor border-[1px] border-secondaryColor pl-3 rounded-sm text-secondaryColor"
               type="number"
-              value={productQuantityInCart}
-              onChange={(e) => setProductQuantityInCart(e.target.value)}
+              min="1"
+              value={productQuantity}
+              onChange={(e) => setProductQuantity(e.target.value)}
             />
           </div>
           <div>
@@ -283,14 +240,9 @@ export const ProductDetailsPage = () => {
               whileHover={{ backgroundColor: "#8b7355", borderWidth: "0px", color: "#ffffff" }}
               transition={{ duration: 0.4 }}
               className="text-secondaryColor w-full xs:basis-[45%] md:basis-[35%] lg:basis-[40%] bg-transparent border-[1px] border-secondaryColor font-semibold h-[46px] xs:h-[50px] text-sm xs:text-base"
-              onClick={handleAddAndRemoveItemInCartFn}
-              disabled={!hasPrice || !hasStock}
+              onClick={handleAddAndRemoveItemInQuoteFn}
             >
-              {(!hasPrice || !hasStock)
-                ? "Cannot add to cart"
-                : isProductInCart
-                ? "Remove from Cart"
-                : "Add to Cart"}
+              {isProductInQuote ? "Remove from Quote" : "Add to Quote"}
             </motion.button>
 
             <motion.button
@@ -298,14 +250,14 @@ export const ProductDetailsPage = () => {
               whileTap="click"
               variants={primaryBtnVariant}
               className="text-white bg-primaryColor hover:bg-darkPrimaryColor font-semibold w-full xs:basis-[45%] lg:basis-[40%] md:basis-[35%] h-[46px] xs:h-[50px] block text-sm xs:text-base"
-              onClick={buyNowFn}
+              onClick={requestQuoteNowFn}
             >
-              Buy Now
+              Request Quote
             </motion.button>
           </div>
         </div>
       </section>
       <FooterSection />
-  </div>
+    </div>
   )
 }

@@ -8,12 +8,12 @@ import { setCart } from "../../features/wishlistAndCartSlice"
 import { useNavigate } from "react-router-dom"
 
 export const SingleProductSection = ({ cartData, setIsCartSectionActive }) => {
-  const { title, price, discountPercentValue, image, _id, stock } = cartData
+  const { title, image, _id } = cartData
   const dispatch = useDispatch()
   const navigate = useNavigate()
 
   const { cart } = useSelector((state) => state.wishlistAndCartSection)
-  const [productQuantityInCart, setProductQuantityInCart] = useState(1)
+  const [productQuantityInQuote, setProductQuantityInQuote] = useState(1)
 
   const serverUrl = process.env.REACT_APP_SERVER_URL || "http://localhost:5000"
 
@@ -36,7 +36,7 @@ export const SingleProductSection = ({ cartData, setIsCartSectionActive }) => {
   useEffect(() => {
     for (const key of cart) {
       if (key._id === _id) {
-        setProductQuantityInCart(key.quantity)
+        setProductQuantityInQuote(key.quantity)
       }
     }
   }, [cart, _id])
@@ -49,7 +49,7 @@ export const SingleProductSection = ({ cartData, setIsCartSectionActive }) => {
     for (const key of newCart) {
       if (key._id === _id) {
         const index = newCart.indexOf(key)
-        const newQty = Number.parseInt(productQuantityInCart) || 0
+        const newQty = Number.parseInt(productQuantityInQuote) || 0
         if (newCart[index].quantity !== newQty) {
           newCart[index] = { ...key, quantity: newQty }
           changed = true
@@ -60,10 +60,7 @@ export const SingleProductSection = ({ cartData, setIsCartSectionActive }) => {
     if (changed) {
       dispatch(setCart(newCart))
     }
-  }, [productQuantityInCart, cart, dispatch, _id])
-
-  // get the discount percent value if present so as to display it
-  const discountedPrice = price - (price * discountPercentValue) / 100
+  }, [productQuantityInQuote, cart, dispatch, _id])
 
   return (
     <div className="flex gap-4 border-b-[1px] border-LightSecondaryColor pb-4">
@@ -85,22 +82,6 @@ export const SingleProductSection = ({ cartData, setIsCartSectionActive }) => {
       </div>
       <div className="flex flex-col gap-3 w-[45%] text-base">
         <h2 className="  md:text-[18px] font-normal font-RobotoSlab capitalize">{title}</h2>
-        {typeof discountPercentValue === "number" && discountPercentValue > 0 && typeof discountedPrice === "number" && !isNaN(discountedPrice) ? (
-          <div className="flex gap-3">
-            <h3 className="font-bold   md:text-[18px] tracking-wide">${discountedPrice.toFixed(2)}</h3>
-            {typeof price === "number" && !isNaN(price) ? (
-              <h3 className="font-medium text-[14px] md:text-[16px]  tracking-wide text-lightBlack line-through">
-                ${price.toFixed(2)}
-              </h3>
-            ) : null}
-          </div>
-        ) : typeof price === "number" && !isNaN(price) ? (
-          <h3 className="font-bold   md:text-[18px] tracking-wide ">${price.toFixed(2)}</h3>
-        ) : null}
-        <span className="text-primaryColor font-RobotoCondensed tracking-[0.7px]">
-          {stock < 0 ? "Out of stock" : <strong>{stock}</strong>}
-          {stock >= 0 && " left in stock"}
-        </span>
         <div className="flex items-center gap-1 cursor-pointer">
           <FaTrash className="w-4 h-[0.9em] fill-primaryColor" />{" "}
           <h3
@@ -116,8 +97,9 @@ export const SingleProductSection = ({ cartData, setIsCartSectionActive }) => {
         type="number"
         name=""
         id=""
-        value={productQuantityInCart}
-        onChange={(e) => setProductQuantityInCart(e.target.value)}
+        min="1"
+        value={productQuantityInQuote}
+        onChange={(e) => setProductQuantityInQuote(e.target.value)}
       />
     </div>
   )

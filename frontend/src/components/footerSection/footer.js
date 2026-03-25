@@ -20,7 +20,9 @@ export const Footer = () => {
           <ul className="flex gap-4 xs:gap-6 items-start">
             <IoLocationOutline className="w-5 h-5 xs:w-6 xs:h-6 stroke-primaryColor flex-shrink-0" />
             <li className="text-sm xs:text-base">
-              Pajtoni Center, Autostrada Tr-Dr km1., Tirana, Albania 2076{" "}
+              <a href="https://maps.app.goo.gl/seR67DzBTpDyKAwn8" target="_blank" rel="noopener noreferrer" className="hover:underline">
+                Pajtoni Center, Autostrada Tr-Dr km1., Tirana, Albania 2076
+              </a>
             </li>
           </ul>
           <ul className="flex gap-4 xs:gap-6 items-center">

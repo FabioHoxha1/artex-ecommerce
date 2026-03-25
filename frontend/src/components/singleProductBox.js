@@ -10,18 +10,12 @@ import { isProductInCartFn, isProductInWishlistFn } from "../utils/isSpecificPro
 import { motion } from "framer-motion"
 import { primaryBtnVariant } from "../utils/animation"
 import { cartTextChangeVariant } from "../utils/animation"
-// removed unused useInView import
 
 export const SingleProductBox = ({ productsData }) => {
-  const { _id, title, price, images, image, discountPercentValue } = productsData
-  const hasPrice = typeof price === "number" && !isNaN(price)
-  const hasDiscount = typeof discountPercentValue === "number" && !isNaN(discountPercentValue) && discountPercentValue > 0
-  const displayPrice = hasPrice ? price : undefined
-  const displayDiscount = hasDiscount ? discountPercentValue : undefined
-  const discountedPrice = hasPrice && hasDiscount ? price - (price * discountPercentValue) / 100 : undefined
+  const { _id, title, images, image } = productsData
 
   const [isWishlisted, setIsWishlisted] = useState(false)
-  const [isProductInCart, setIsProductInCart] = useState(false)
+  const [isProductInQuote, setIsProductInQuote] = useState(false)
 
   const dispatch = useDispatch()
   const { wishlist, cart } = useSelector((state) => state.wishlistAndCartSection)
@@ -48,11 +42,9 @@ export const SingleProductBox = ({ productsData }) => {
 
   useEffect(() => {
     isProductInWishlistFn(_id, setIsWishlisted, wishlist)
-    // include _id so the effect re-runs when product id or wishlist changes
   }, [wishlist, _id])
   useEffect(() => {
-    isProductInCartFn(_id, setIsProductInCart, cart)
-    // include _id so the effect re-runs when product id or cart changes
+    isProductInCartFn(_id, setIsProductInQuote, cart)
   }, [cart, _id])
 
   return (
@@ -70,14 +62,8 @@ export const SingleProductBox = ({ productsData }) => {
         />
       </div>
 
-      {displayDiscount && (
-        <div className="flex justify-center items-center absolute w-12 xs:w-16 px-2 xs:px-3 h-6 xs:h-8 z-[100] top-[4%] xs:top-[6%] hover:opacity-100 bg-lightPrimaryColor text-white shadow-[0px_3px_8px_0px_rgba(0,0,0,0.2)] text-xs xs:text-base">
-          <span>{discountPercentValue}%</span>
-        </div>
-      )}
-
       {imageCount > 1 && (
-        <div className="absolute bottom-[38%] xs:bottom-[35%] left-[3%] xs:left-[5%] bg-black/60 text-white text-[10px] xs:text-xs px-1.5 xs:px-2 py-0.5 xs:py-1 rounded z-[100]">
+        <div className="absolute bottom-[40%] xs:bottom-[37%] left-[3%] xs:left-[5%] bg-black/60 text-white text-[10px] xs:text-xs px-1.5 xs:px-2 py-0.5 xs:py-1 rounded z-[100]">
           +{imageCount} photos
         </div>
       )}
@@ -138,26 +124,12 @@ export const SingleProductBox = ({ productsData }) => {
       <h4 className="text-[16px] xs:text-[18px] md:text-[20px] font-normal capitalize mt-3 xs:mt-4 line-clamp-2">
         {title}
       </h4>
-      {displayDiscount !== undefined && displayPrice !== undefined ? (
-        <div className="flex gap-2 xs:gap-3 mt-[0.125rem] mb-3 xs:mb-4 flex-wrap">
-          <h3 className="font-bold text-[16px] xs:text-[18px] md:text-[20px] tracking-wide">
-            {discountedPrice.toFixed(2)}
-          </h3>
-          <h3 className="font-medium text-[14px] xs:text-[16px] md:text-[18px] tracking-wide text-lightBlack line-through">
-            {price.toFixed(2)}
-          </h3>
-        </div>
-      ) : displayPrice !== undefined ? (
-        <h3 className="font-bold text-[16px] xs:text-[18px] md:text-[20px] mt-[0.125rem] mb-3 xs:mb-4 tracking-wide">
-          {price.toFixed(2)}
-        </h3>
-      ) : null}
       <motion.button
         initial="initial"
         whileTap="click"
         variants={primaryBtnVariant}
         className="w-[100%] h-[44px] xs:h-[48px] md:h-[52px] mx-auto rounded-md text-[#ffffff] bg-primaryColor hover:bg-darkPrimaryColor transition-colors duration-300 text-sm xs:text-base"
-        onClick={() => handleCartModification(_id, dispatch, null, isProductInCart)}
+        onClick={() => handleCartModification(_id, dispatch, null, isProductInQuote)}
       >
         <motion.span
           className="w-[100%] h-[100%] flex items-center justify-center"
@@ -166,9 +138,9 @@ export const SingleProductBox = ({ productsData }) => {
           variants={cartTextChangeVariant}
         >
           {" "}
-          {isProductInCart ? "Remove from cart" : "Add to cart"}
+          {isProductInQuote ? "Remove from quote" : "Add to quote"}
         </motion.span>
       </motion.button>
-  </article>
+    </article>
   )
 }

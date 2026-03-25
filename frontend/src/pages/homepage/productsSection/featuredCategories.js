@@ -47,12 +47,12 @@ export const FeaturedCategories = () => {
       <div className="flex flex-col w-[100%] mt-16 xs:mt-20 md:mt-24 gap-10 xs:gap-12 md:gap-16">
         <article className="bg-[#e5e5e5] text-secondaryColor h-[130px] xs:h-[160px] md:h-[180px] lg:h-[200px] flex justify-center items-center px-[4%]">
           <h1 className="font-bold text-[18px] xs:text-[24px] md:text-[28px] lg:text-[32px] tablet:w-[55%] md:w-[55%] lg:w-[40%] text-center">
-            GET UP TO <span className="text-primaryColor mr-[5px]">35% OFF</span>ON FIRST ORDER DEAL AND FREE SHIPPING{" "}
+            Refresh your space with our latest arrivals and offers.
           </h1>
         </article>
         <article className="bg-[#e5e5e5] text-secondaryColor h-[130px] xs:h-[160px] md:h-[180px] lg:h-[200px] flex justify-center items-center px-[4%]">
           <h1 className="font-bold tablet:w-[55%] md:w-[55%] text-[18px] xs:text-[24px] md:text-[28px] lg:text-[32px] lg:w-[40%] text-center">
-            GET UP TO <span className="text-primaryColor mr-[5px]">60% OFF</span>ON SETS CATEGORIES{" "}
+            Explore exclusive deals on sets categories.
           </h1>
         </article>
       </div>

@@ -4,7 +4,7 @@ import { RiArrowDropDownLine } from "react-icons/ri"
 import { BiFilter } from "react-icons/bi"
 import { SingleProductBox } from "../../components/singleProductBox"
 import { useSelector, useDispatch } from "react-redux"
-import { useEffect, useState } from "react"
+import { useEffect, useState, useRef } from "react"
 import FooterSection from "../../components/footerSection"
 import { ProductLoader } from "../../components/loaders/productLoader"
 import { PaginationSection } from "../../components/paginationSection"
@@ -20,6 +20,9 @@ const Index = () => {
   const [isFilterBySectionOpen, setIsFilterBySectionOpen] = useState(false)
   const [isFilterFnApplied, setIsFilterFnApplied] = useState(false)
   const [searchTerm, setSearchTerm] = useState("")
+  const [isSortOpen, setIsSortOpen] = useState(false)
+
+  const sortRef = useRef(null)
 
   const location = useLocation()
   const navigate = useNavigate()
@@ -32,49 +35,47 @@ const Index = () => {
     productsDataForCurrentPage,
     sortedAllProductsData,
   } = useSelector((state) => state.productsData)
-  const { priceRange, selectedSubCategoryForFilter, selectedCategory } = useSelector(
+
+  const { selectedSubCategories } = useSelector(
     (state) => state.filterByCategoryAndPrice,
   )
 
   const NoOfProductsPerPage = 12
   const [currentPageNo, setCurrentPageNo] = useState(1)
 
+  // GET SEARCH PARAM
   useEffect(() => {
     const urlParams = new URLSearchParams(location.search)
     const searchedProduct = urlParams.get("searchedProduct")
-    console.log("[v0] Search term from URL:", searchedProduct)
     setSearchTerm(searchedProduct || "")
   }, [location.search])
 
+  // SORT + SEARCH
   useEffect(() => {
-    console.log("[v0] All products:", allProductsData)
-    console.log("[v0] Search term:", searchTerm)
-
     const productsToSort = searchTerm
-      ? allProductsData.filter((product) => {
-          if (!product || !product.title) return false
-          const matches = product.title.toLowerCase().includes(searchTerm.toLowerCase())
-          console.log(`[v0] Product "${product.title}" matches "${searchTerm}":`, matches)
-          return matches
-        })
+      ? allProductsData.filter((p) =>
+          p?.title?.toLowerCase().includes(searchTerm.toLowerCase())
+        )
       : allProductsData
 
-    console.log("[v0] Products to sort:", productsToSort)
-    handleSorting(dispatch, sortingCriteria, productsToSort, NoOfProductsPerPage, currentPageNo, location.pathname)
+    handleSorting(
+      dispatch,
+      sortingCriteria,
+      productsToSort,
+      NoOfProductsPerPage,
+      currentPageNo,
+      location.pathname
+    )
   }, [dispatch, sortingCriteria, allProductsData, searchTerm, currentPageNo, location.pathname])
 
+  // SET PLACEHOLDER
   useEffect(() => {
-    console.log("[v0] sortedAllProductsData:", sortedAllProductsData)
-    console.log("[v0] Has search term:", !!searchTerm)
-    console.log("[v0] Has category filter:", !!selectedSubCategoryForFilter)
-    console.log("[v0] Has price filter:", !!priceRange)
-
-    if (searchTerm && !selectedSubCategoryForFilter && !priceRange) {
-      console.log("[v0] Setting placeholder to sortedAllProductsData:", sortedAllProductsData)
+    if (searchTerm && selectedSubCategories.length === 0) {
       dispatch(setPlaceholderOfproductsDataCurrentlyRequested(sortedAllProductsData))
     }
-  }, [searchTerm, sortedAllProductsData, selectedSubCategoryForFilter, priceRange, dispatch])
+  }, [searchTerm, sortedAllProductsData, selectedSubCategories, dispatch])
 
+  // PAGINATION
   useEffect(() => {
     handlePaginationProductsPage(
       dispatch,
@@ -84,21 +85,31 @@ const Index = () => {
     )
   }, [currentPageNo, NoOfProductsPerPage, placeholderOfproductsDataCurrentlyRequested, dispatch])
 
-  const handleSortingCriteriaSelection = (e) => {
-    if (e.target.dataset.list) {
-      setSortingCriteria(e.target.textContent)
-      // reset to first page when sort changes
-      setCurrentPageNo(1)
-      e.currentTarget.classList.remove("active-sorting-lists")
+  // CLOSE DROPDOWN ON OUTSIDE CLICK
+  useEffect(() => {
+    const handleClickOutside = (e) => {
+      if (sortRef.current && !sortRef.current.contains(e.target)) {
+        setIsSortOpen(false)
+      }
     }
+    document.addEventListener("mousedown", handleClickOutside)
+    return () => document.removeEventListener("mousedown", handleClickOutside)
+  }, [])
+
+  const handleSortingCriteriaSelection = (value) => {
+    setSortingCriteria(value)
+    setCurrentPageNo(1)
+    setIsSortOpen(false)
   }
 
   return (
     <section className="lg:grid lg:grid-cols-[250px_1fr_1fr_1fr] lg:grid-rows-[auto_1fr_auto]">
-      <div className="mt-4 tablet:px-[6%] w-[100%] h-[54px] bg-neutralColor text-secondaryColor xl:px-[4%] px-[4%] lg:px-[2%] flex items-center justify-between font-bold  font-RobotoCondensed lg:col-span-full lg:row-span-1">
-        <div className="flex gap-[4px] items-center text-base">
+
+      {/* HEADER */}
+      <div className="mt-4 px-[4%] h-[54px] bg-neutralColor text-secondaryColor flex items-center font-bold lg:col-span-full">
+        <div className="flex gap-1 items-center">
           <IoIosArrowBack />
-          <li onClick={() => navigate("/")} className="hover:underline capitalize">
+          <li onClick={() => navigate("/")} className="hover:underline cursor-pointer">
             Home
           </li>
           <IoIosArrowBack />
@@ -109,17 +120,10 @@ const Index = () => {
               <span>Search: {searchTerm}</span>
             </>
           )}
-          {selectedSubCategoryForFilter && (
-            <>
-              {" "}
-              <IoIosArrowBack />
-              <span>{selectedCategory}</span> <IoIosArrowBack />
-              <span>{selectedSubCategoryForFilter}</span>
-            </>
-          )}
         </div>
       </div>
 
+      {/* FILTER */}
       <FilterBySection
         {...{
           isFilterBySectionOpen,
@@ -130,80 +134,98 @@ const Index = () => {
         }}
       />
 
-      <div className="lg:col-start-2  lg:col-end-5 lg:row-span-1 lg:ml-[8%] xl:ml-[10%] lg:mr-[3%] xl:mr-[5%]">
-        <h1 className="text-center font-bold text-[2.5rem] my-8">
+      {/* MAIN */}
+      <div className="lg:col-start-2 lg:col-end-5 mt-2 px-[4%] relative z-0">
+
+        <h1 className="text-center font-bold text-3xl my-2">
           {searchTerm ? `Search Results for "${searchTerm}"` : "Shop"}
         </h1>
+
         {isLoading ? (
           <ProductLoader />
         ) : (
           <>
-            <div className="lg:flex lg:justify-between lg:items-start">
-              {isFilterFnApplied && (selectedSubCategoryForFilter || priceRange) && (
-                <article className="w-[300px] tablet:w-[360px] max-w-[75%] md:w-[400px]  bg-[#ffffff] laptop:w-[17%]  ml-[4%] tablet:ml-[6%]  mb-6 flex-col flex gap-2 lg:ml-0 lg:order-2 lg:min-w-[400px]">
-                  <h3 className="text-lg font-bold ml-2"> Active Filters</h3>
-                  <div className="flex  justify-between h-14 bg-primaryColor text-white rounded-md shadow-[0px_3px_8px_0px_rgba(0,0,0,0.2)]  items-center px-[5%] font-medium text-base ">
-                    {selectedSubCategoryForFilter && <h3>Sub-Category : {selectedSubCategoryForFilter}</h3>}
-                    {priceRange && <h3>priceRange : {priceRange}($)</h3>}
+            <div className="flex justify-between items-start mb-6">
+
+              {/* SORT */}
+              <div className="relative w-[220px]" ref={sortRef}>
+                <h3 className="text-base font-bold mb-2">Sort by</h3>
+
+                <div
+                  onClick={() => setIsSortOpen(!isSortOpen)}
+                  className="flex justify-between items-center h-12 px-4 rounded-md shadow cursor-pointer bg-white"
+                >
+                  <span>{sortingCriteria}</span>
+                  <RiArrowDropDownLine className="w-6 h-6" />
+                </div>
+
+                {/* DROPDOWN */}
+                <div
+                  className={`absolute top-full left-0 w-full bg-white shadow-lg rounded-md mt-2 z-[9999] pointer-events-auto transition-all duration-200 ${
+                    isSortOpen ? "opacity-100 visible" : "opacity-0 invisible"
+                  }`}
+                >
+                  {["Default: Latest", "Name: A-Z", "Name: Z-A", "Oldest"].map((item) => (
+                    <div
+                      key={item}
+                      onClick={() => handleSortingCriteriaSelection(item)}
+                      className="px-4 py-2 hover:bg-gray-100 cursor-pointer"
+                    >
+                      {item}
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              {/* ACTIVE FILTERS */}
+              {isFilterFnApplied && selectedSubCategories.length > 0 && (
+                <div>
+                  <h3 className="text-sm font-bold mb-2">
+                    Active Filters ({selectedSubCategories.length})
+                  </h3>
+                  <div className="flex gap-2 flex-wrap">
+                    {selectedSubCategories.map((f, i) => (
+                      <span key={i} className="px-3 py-1 bg-primaryColor text-white rounded-full text-sm">
+                        {f.subCategory}
+                      </span>
+                    ))}
                   </div>
-                </article>
+                </div>
               )}
-              <article className="w-[65%] tablet:w-[40%] md:w-[30%] bg-[#ffffff] lg:order-1 laptop:w-[17%] lg:w-[30%] ml-[4%] tablet:ml-[6%]  mb-6 flex-col lg:ml-0 flex gap-2 lg:max-w-[262px]">
-                <h3 className="text-lg font-bold ml-2"> Sort by</h3>
-                <div
-                  className={`flex justify-between h-14 rounded-md  shadow-[0.5px_2px_32px_-2px_rgba(0,0,0,0.1)]  items-center px-[10%] cursor-pointer ${
-                    sortingCriteria !== "Default: Latest" && "bg-primaryColor text-white"
-                  }`}
-                  onClick={(e) => {
-                    e.currentTarget.nextElementSibling.classList.toggle("active-sorting-lists")
-                  }}
-                >
-                  <h2 className="text-black">{sortingCriteria}</h2>
-                  <RiArrowDropDownLine className="w-8 h-8 " />
-                </div>
-                <div
-                  className={`hidden flex-col bg-[#ffffff] rounded-md shadow-[0px_3px_8px_0px_rgba(0,0,0,0.2)]   py-4  gap-4 z-[200] px-[10%] sticky top-0 left-0 right-0 mb-[-16.5rem] lg:mb-[-15.5rem] transition duration-700 ease-in-out sorting-lists ${
-                    sortingCriteria !== "Default: Latest" && "bg-primaryColor text-white"
-                  }`}
-                  onClick={(e) => handleSortingCriteriaSelection(e)}
-                >
-                  <li data-list="sorting-criteria" className="text-black">Default: Latest</li>
-                  <li data-list="sorting-criteria" className="text-black">Name: A-Z</li>
-                  <li data-list="sorting-criteria" className="text-black">Name: Z-A</li>
-                  <li data-list="sorting-criteria" className="text-black">Price: low to high</li>
-                  <li data-list="sorting-criteria" className="text-black">Price: high to low</li>
-                  <li data-list="sorting-criteria" className="text-black">Oldest</li>
-                </div>
-              </article>
             </div>
 
+            {/* PRODUCTS */}
             {placeholderOfproductsDataCurrentlyRequested.length > 0 ? (
               <>
-                {" "}
-                <section className="grid grid-cols-2 tablet:grid-cols-2 md:grid-cols-3 xl:grid-cols-4  lg:w-[100%] w-[96%] mx-auto items-center justify-center gap-4  tablet:justify-between tablet:w-[92%] md:justify-between tablet:gap-y-6 md:gap-y-8 md:gap-[2%]  tablet:gap-[3%]">
-                  {productsDataForCurrentPage.map((productsData, index) => {
-                    return <SingleProductBox key={index} productsData={productsData} />
-                  })}
+                <section className="relative z-0 grid grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-4">
+                  {productsDataForCurrentPage.map((p, i) => (
+                    <SingleProductBox key={i} productsData={p} />
+                  ))}
                 </section>
-                <PaginationSection {...{ setCurrentPageNo, NoOfProductsPerPage, currentPageNo }} />
-                <div className="fixed right-[7%] bottom-[7%] lg:hidden z-[1000]">
+
+                <PaginationSection
+                  {...{ setCurrentPageNo, NoOfProductsPerPage, currentPageNo }}
+                />
+
+                {/* MOBILE FILTER */}
+                <div className="fixed right-6 bottom-6 lg:hidden z-[1000]">
                   <BiFilter
-                    className="w-16 h-16 bg-primaryColor shadow-lg shadow-[rgba(0,0,0,0.2)] fill-white cursor-pointer"
+                    className="w-14 h-14 bg-primaryColor text-white rounded-full shadow cursor-pointer"
                     onClick={() => setIsFilterBySectionOpen(true)}
                   />
-                  <span className="absolute   -left-5 -top-2 -translate-y-full w-20 px-2 py-1 bg-gray-700 rounded-lg text-center text-white text-sm after:content-[''] after:absolute after:left-1/2 after:top-[100%] shadow-lg shadow-[rgba(0,0,0,0.2)]   after:border-8 after:border-x-transparent after:border-b-transparent after:border-t-gray-700">
-                    Filter Products
-                  </span>
                 </div>
               </>
             ) : (
-              <h1 className="text-center text-[28px] md-[32px] lg:text-[36px]">
-                {searchTerm ? `No products found for "${searchTerm}"` : "product match not found"}
+              <h1 className="text-center text-2xl">
+                {searchTerm
+                  ? `No products found for "${searchTerm}"`
+                  : "No products found"}
               </h1>
             )}
           </>
         )}
       </div>
+
       <FooterSection />
     </section>
   )

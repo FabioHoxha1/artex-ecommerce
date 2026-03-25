@@ -16,10 +16,10 @@ export const WhyChooseUsSection = () => {
               <FaTruck className="fill-secondaryColor w-7 h-7 xs:w-9 xs:h-9 md:w-8 md:h-8 lg:w-10 lg:h-10" />
             </div>
             <h4 className="text-[20px] xs:text-[24px] md:text-[20px] lg:text-[22px] font-bold font-RobotoCondensed text-primaryColor mb-3">
-              Free Shipping
+              Shipping
             </h4>
             <p className="leading-[140%] text-sm xs:text-base md:text-sm lg:text-base text-gray-600 max-w-[280px]">
-              We offer free shipping on all orders, so you can shop with confidence knowing that there are no hidden
+              We offer shipping on all orders, so you can shop with confidence knowing that your items will be delivered directly to your doorstep.
               costs.
             </p>
           </div>

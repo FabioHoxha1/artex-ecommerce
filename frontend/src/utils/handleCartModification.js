@@ -61,7 +61,7 @@ export const handleCartModification = (_id, dispatch, productQuantity, isObjInCa
         };
         newCart = [...cart, currentCartedProduct];
         console.log("[v0] Added new product with quantity:", currentCartedProduct.quantity);
-        toast("Product has been added to cart", {
+        toast("Product has been added to quote", {
           type: "success",
           autoClose: 2000,
         });

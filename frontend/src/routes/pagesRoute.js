@@ -1,4 +1,5 @@
 "use client"
+import { MessagesTab } from "../pages/adminPage/messagesTab"
 import { Route, Routes } from "react-router-dom"
 import Homepage from "../pages/homepage/homepage"
 import ShopPage from "../pages/shopPage"
@@ -26,6 +27,10 @@ import { AdminManagement } from "../pages/adminPage/adminManagement/admins"
 import { CreateFirstAdmin } from "../pages/adminPage/CreateFirstAdmin"
 import { OrdersTab } from "../pages/adminPage/ordersTab"
 import { CategoryManagement } from "../pages/adminPage/categoryTab"
+import { ProjectsManagement } from "../pages/adminPage/projectsTab"
+import { ProjectsPage } from "../pages/projectsPage"
+import { ProjectDetailsPage } from "../pages/projectsPage/projectDetailsPage"
+
 
 const PagesRoute = ({ setIsCartSectionActive }) => {
   const location = useLocation()
@@ -36,6 +41,8 @@ const PagesRoute = ({ setIsCartSectionActive }) => {
         <Route path="/shop" element={<ShopPage />} />
         <Route path="/aboutUs" element={<AboutUsPage />} />
         <Route path="/contactUs" element={<ContactUsPage />} />
+        <Route path="/projects" element={<ProjectsPage />} />
+        <Route path="/project/:projectId" element={<ProjectDetailsPage />} />
 
         <Route path="/admin" element={<AdminPage />} />
         <Route path="/setup-admin" element={<CreateFirstAdmin />} />
@@ -62,6 +69,8 @@ const PagesRoute = ({ setIsCartSectionActive }) => {
           <Route path="user-Management" element={<UserManagement />} />
           <Route path="admin-Management" element={<AdminManagement />} />
           <Route path="category-Management" element={<CategoryManagement />} />
+          <Route path="projects-Management" element={<ProjectsManagement />} />
+          <Route path="messages" element={<MessagesTab />} />
         </Route>
 
         <Route path="*" element={<h2>path doesnt exist</h2>} />

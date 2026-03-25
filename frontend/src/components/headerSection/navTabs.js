@@ -35,6 +35,11 @@ export const NavTabs = ({ isLoggedIn, userData }) => {
           Contact
         </Link>
       </li>
+      <li className=" md:hover:bg-transparent md:py-0 py-[6px] hover:bg-neutralColor  ">
+        <Link to="/projects" className="px-[4%] w-[100%] h-[100%] inline-block  tablet:px-[6%]   md:px-0 ">
+          Projects
+        </Link>
+      </li>
 
       <div className="flex flex-col gap-2 mt-[8px] mx-[4%] tablet:mx-[6%] md:hidden">
         {isLoggedIn ? (

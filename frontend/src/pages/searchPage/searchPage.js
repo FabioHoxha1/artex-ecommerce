@@ -26,7 +26,7 @@ export const SearchPage = () => {
     productsDataForCurrentPage,
     searchedProductData,
   } = useSelector((state) => state.productsData);
-  const { priceRange, selectedSubCategoryForFilter, selectedCategory } = useSelector(
+  const { selectedSubCategories } = useSelector(
     (state) => state.filterByCategoryAndPrice
   );
 
@@ -98,14 +98,7 @@ export const SearchPage = () => {
           </li>
           <IoIosArrowBack />
           <span>Search results</span>
-          {selectedSubCategoryForFilter && (
-            <>
-              {" "}
-              <IoIosArrowBack />
-              <span>{selectedCategory}</span> <IoIosArrowBack />
-              <span>{selectedSubCategoryForFilter}</span>
-            </>
-          )}
+          {/* Removed old single filter display, now handled by chips below */}
         </div>
       </div>
 
@@ -128,12 +121,18 @@ export const SearchPage = () => {
         ) : (
           <>
             <div className="lg:flex lg:justify-between lg:items-start">
-              {isFilterFnApplied && (selectedSubCategoryForFilter || priceRange) && (
-                <article className="w-[300px] tablet:w-[360px] max-w-[75%] md:w-[400px]  bg-[#ffffff] laptop:w-[17%]  ml-[4%] tablet:ml-[6%]  mb-12 flex-col flex gap-2 lg:ml-0 lg:order-2 lg:min-w-[400px]">
-                  <h3 className="text-lg font-bold ml-2"> Active Filters</h3>
-                  <div className="flex  justify-between h-14 bg-lightPrimaryColor text-white rounded-md shadow-[0px_3px_8px_0px_rgba(0,0,0,0.2)]  items-center px-[5%] font-medium text-base ">
-                    {selectedSubCategoryForFilter && <h3>Sub-Category : {selectedSubCategoryForFilter}</h3>}
-                    {priceRange && <h3>priceRange : {priceRange}($)</h3>}
+              {isFilterFnApplied && selectedSubCategories.length > 0 && (
+                <article className="w-auto max-w-[90%] bg-[#ffffff] ml-[4%] tablet:ml-[6%] mb-4 flex-col flex gap-2 lg:ml-0 lg:order-2">
+                  <h3 className="text-sm font-bold">Active Filters ({selectedSubCategories.length})</h3>
+                  <div className="flex flex-wrap gap-2">
+                    {selectedSubCategories.map((filter, index) => (
+                      <span 
+                        key={index}
+                        className="px-3 py-1 bg-primaryColor text-white text-sm rounded-full"
+                      >
+                        {filter.subCategory}
+                      </span>
+                    ))}
                   </div>
                 </article>
               )}
@@ -159,8 +158,6 @@ export const SearchPage = () => {
                   <li data-list="sorting-criteria">Default: Latest</li>
                   <li data-list="sorting-criteria">Name: A-Z</li>
                   <li data-list="sorting-criteria">Name: Z-A</li>
-                  <li data-list="sorting-criteria">Price: low to high</li>
-                  <li data-list="sorting-criteria">Price: high to low</li>
                   <li data-list="sorting-criteria">Oldest</li>
                 </div>
               </article>

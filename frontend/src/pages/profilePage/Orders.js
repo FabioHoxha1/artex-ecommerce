@@ -16,7 +16,7 @@ export const Orders = () => {
       const LoginToken = JSON.parse(localStorage.getItem("UserData"))?.loginToken || ""
 
       if (!LoginToken) {
-        toast.error("Please log in to view your orders")
+        toast.error("Please log in to view your quote requests")
         setLoading(false)
         return
       }
@@ -30,8 +30,8 @@ export const Orders = () => {
       setOrders((data.user.orders || []).reverse())
       setLoading(false)
     } catch (error) {
-      console.error("Failed to fetch orders:", error)
-      toast.error("Failed to fetch orders")
+      console.error("Failed to fetch quote requests:", error)
+      toast.error("Failed to fetch quote requests")
       setLoading(false)
     }
   }, [serverUrl])
@@ -51,35 +51,53 @@ export const Orders = () => {
   const getStatusColor = (status) => {
     switch (status) {
       case "pending":
+      case "quote_requested":
         return "bg-yellow-100 text-yellow-800"
       case "delivered":
+      case "quote_sent":
         return "bg-green-100 text-green-800"
       case "cancelled":
         return "bg-red-100 text-red-800"
-      case "paid":
-        return "bg-green-100 text-green-800"
+      case "quote":
+      case "in_review":
+        return "bg-blue-100 text-blue-800"
       default:
         return "bg-gray-100 text-gray-800"
+    }
+  }
+
+  const getStatusLabel = (status) => {
+    switch (status) {
+      case "quote_requested":
+        return "Quote Requested"
+      case "quote_sent":
+        return "Quote Sent"
+      case "in_review":
+        return "In Review"
+      case "quote":
+        return "Awaiting Quote"
+      default:
+        return status
     }
   }
 
   if (loading) {
     return (
       <div className="flex items-center justify-center h-64">
-        <div className="text-lg">Loading your orders...</div>
+        <div className="text-lg">Loading your quote requests...</div>
       </div>
     )
   }
 
   return (
     <div className="w-full px-4 py-6">
-      <h2 className="text-2xl font-bold mb-6">My Orders</h2>
+      <h2 className="text-2xl font-bold mb-6">My Quote Requests</h2>
 
       {orders.length === 0 ? (
         <div className="bg-white rounded-lg shadow p-8 text-center">
-          <p className="text-gray-500 mb-4">You haven't placed any orders yet</p>
+          <p className="text-gray-500 mb-4">You haven't submitted any quote requests yet</p>
           <a href="/shop" className="text-[#fca311] hover:underline font-medium">
-            Start Shopping
+            Browse Products
           </a>
         </div>
       ) : (
@@ -88,26 +106,14 @@ export const Orders = () => {
             <div key={order._id || index} className="bg-white rounded-lg shadow p-6">
               <div className="flex justify-between items-start mb-4">
                 <div>
-                  <p className="text-sm text-gray-500">Order Date</p>
+                  <p className="text-sm text-gray-500">Request Date</p>
                   <p className="font-medium">{formatDate(order.date)}</p>
                 </div>
                 <div className="text-right">
-                  <p className="text-sm text-gray-500">Total Amount</p>
-                  <p className="font-bold text-lg">${order.totalAmount?.toFixed(2)}</p>
-                </div>
-              </div>
-
-              <div className="flex gap-4 mb-4">
-                <div>
                   <span
                     className={`px-3 py-1 rounded-full text-xs font-medium ${getStatusColor(order.deliveryStatus)}`}
                   >
-                    Delivery: {order.deliveryStatus}
-                  </span>
-                </div>
-                <div>
-                  <span className={`px-3 py-1 rounded-full text-xs font-medium ${getStatusColor(order.paymentStatus)}`}>
-                    Payment: {order.paymentStatus}
+                    {getStatusLabel(order.deliveryStatus)}
                   </span>
                 </div>
               </div>
@@ -132,14 +138,6 @@ export const Orders = () => {
                       <div className="flex-1">
                         <p className="font-medium">{product.title || "Unknown Product"}</p>
                         <p className="text-sm text-gray-600">Quantity: {product.quantity}</p>
-                        <p className="text-sm text-gray-600">
-                          Price: ${product.price ? product.price.toFixed(2) : "0.00"}
-                        </p>
-                      </div>
-                      <div className="text-right">
-                        <p className="font-medium">
-                          ${product.price && product.quantity ? (product.price * product.quantity).toFixed(2) : "0.00"}
-                        </p>
                       </div>
                     </div>
                   ))}
@@ -148,7 +146,7 @@ export const Orders = () => {
 
               <div className="border-t mt-4 pt-4">
                 <p className="text-sm text-gray-600">
-                  <span className="font-medium">Shipping Address:</span> {order.address}, {order.city}, {order.country}{" "}
+                  <span className="font-medium">Delivery Address:</span> {order.address}, {order.city}, {order.country}{" "}
                   - {order.postalCode}
                 </p>
                 {order.phoneNumber && (

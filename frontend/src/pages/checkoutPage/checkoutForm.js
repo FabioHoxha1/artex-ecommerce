@@ -3,7 +3,7 @@
 import { useSelector } from "react-redux"
 import { FullpageSpinnerLoader } from "../../components/loaders/spinnerIcon"
 
-export const CheckoutForm = ({ placeOrderFn, checkoutFormData, setCheckoutFormData }) => {
+export const CheckoutForm = ({ submitQuoteFn, checkoutFormData, setCheckoutFormData }) => {
   const {
     userData: { isLoading, email },
   } = useSelector((state) => state.userAuth)
@@ -11,7 +11,7 @@ export const CheckoutForm = ({ placeOrderFn, checkoutFormData, setCheckoutFormDa
   return (
     <form
       className="mt-20 w-[92%] mx-auto tablet:w-[88%] lg:basis-[50%] xl:basis-[60%] lg:order-1 lg:mx-0  max-w-[500px] xl:max-w-[600px]"
-      onSubmit={placeOrderFn}
+      onSubmit={submitQuoteFn}
     >
       <article>
         <h2 className="text-[24px] font-bold  mb-6">Contact Information</h2>
@@ -75,7 +75,7 @@ export const CheckoutForm = ({ placeOrderFn, checkoutFormData, setCheckoutFormDa
         </section>
       </article>
       <article className="mt-6">
-        <h2 className="text-[24px] font-bold  mb-6">Billing Address</h2>
+        <h2 className="text-[24px] font-bold  mb-6">Delivery Address</h2>
         <section className="flex flex-col gap-4 w-[100%] mx-auto">
           <div className="w-[100%] ">
             <label htmlFor="" className="font-medium  text-[18px]">
@@ -166,14 +166,16 @@ export const CheckoutForm = ({ placeOrderFn, checkoutFormData, setCheckoutFormDa
         </section>
       </article>
       <article className="mt-6">
-        <h2 className="text-[24px] font-bold  mb-6">Payment method</h2>
-        <p className="font-medium text-[18px] text-beigeColor ">There is no payment functionalities yet*</p>
+        <h2 className="text-[24px] font-bold mb-4">Additional Notes</h2>
+        <p className="font-medium text-[16px] text-gray-600">
+          After submitting your quote request, our team will review your selection and contact you with pricing details.
+        </p>
       </article>
       <button
         type="submit"
         className="my-12 w-[100%] mx-auto block h-[52px] bg-beigeColor text-white font-medium rounded"
       >
-        {isLoading ? <>Processing</> : "Place Order"}
+        {isLoading ? <>Processing</> : "Submit Quote Request"}
       </button>
 
       {isLoading && <FullpageSpinnerLoader />}
